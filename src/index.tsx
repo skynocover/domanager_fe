@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AppProvider } from './AppContext';
-// import { Rehydrated } from 'aws-appsync-react';
 
 import './index.css';
 import 'antd/dist/antd.css';
@@ -12,9 +11,7 @@ import 'font-awesome/css/font-awesome.min.css';
 
 ReactDOM.render(
   <AppProvider>
-    {/* <Rehydrated> */}
     <App />
-    {/* </Rehydrated> */}
   </AppProvider>,
   document.getElementById('root'),
 );
