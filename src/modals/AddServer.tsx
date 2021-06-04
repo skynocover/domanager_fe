@@ -16,7 +16,7 @@ const AddServer = () => {
     appCtx.setModal(null);
 
     for (const item of appCtx.dataSource) {
-      if (item.name === values.name) {
+      if (item.Name === values.name) {
         Notification.add('error', '服務名稱重複');
         return;
       }
@@ -29,18 +29,18 @@ const AddServer = () => {
         let last = preState[preState.length - 1];
         temp = {
           id: last.id + 1,
-          domain: values.domain,
-          name: values.name,
-          port: values.port,
-          handlers: [],
+          Domain: values.domain,
+          Name: values.name,
+          Port: values.port,
+          Handlers: [],
         };
       } else {
         temp = {
           id: 1,
-          domain: values.domain,
-          name: values.name,
-          port: values.port,
-          handlers: [],
+          Domain: values.domain,
+          Name: values.name,
+          Port: values.port,
+          Handlers: [],
         };
       }
 

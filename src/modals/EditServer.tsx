@@ -22,7 +22,7 @@ export const EditServer = ({ server }: EditServerProps) => {
     appCtx.setModal(null);
 
     for (const item of appCtx.dataSource) {
-      if (item.name === values.name && item.id !== server.id) {
+      if (item.Name === values.name && item.id !== server.id) {
         Notification.add('error', '服務名稱重複');
         return;
       }
@@ -33,10 +33,10 @@ export const EditServer = ({ server }: EditServerProps) => {
         if (item.id === server.id) {
           item = {
             id: server.id,
-            domain: values.domain,
-            name: values.name,
-            port: values.port,
-            handlers: server.handlers,
+            Domain: values.domain,
+            Name: values.name,
+            Port: values.port,
+            Handlers: server.Handlers,
           };
         }
         return { ...item };

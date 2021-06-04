@@ -12,6 +12,8 @@ import { EditServer } from '../modals/EditServer';
 import { AddHandler } from '../modals/AddHandler';
 import { EditHandler } from '../modals/EditHandler';
 import { listServers } from '../graphql/queries';
+import {putServer }from '../graphql/mutations'
+
 
 export const ServerPage = () => {
   const appCtx = React.useContext(AppContext);
@@ -19,15 +21,14 @@ export const ServerPage = () => {
 
   const initialize = async () => {
     let data = await client.query({
-      query: gql`
-        ${listServers}
-      `,
+      query: gql(listServers),
+      fetchPolicy: 'network-only'
     });
 
     // let result = await appCtx.fetch('get', '/api/servers');
     if (data) {
-      // console.log('servers: ', JSON.stringify(data.data.listServers));
       let result = JSON.parse(JSON.stringify(data));
+      console.log('servers: ', JSON.stringify(result));
 
       appCtx.setDataSource(result.data.listServers.items);
     }
@@ -37,15 +38,16 @@ export const ServerPage = () => {
     let user = JSON.parse(cookie.get('user') || '{}');
     initialize();
     if (appCtx.dataSource.length > 0) {
-      setActiveKey(appCtx.dataSource[0].name);
+      setActiveKey(appCtx.dataSource[0].Name);
     }
   }, []);
 
   const deleteHandler = (handler: handler) => {
     appCtx.setDataSource((preState: server[]) => {
       preState.map((server) => {
-        if (server.handlers && server.handlers?.length > 0) {
-          server.handlers = server.handlers?.filter((itemH) => itemH.id !== handler.id);
+        if (server.Handlers && server.Handlers?.length > 0) {
+          server.Handlers = server.Handlers?.filter((itemH) => itemH.type !== handler.type && itemH.route !== handler.route && itemH.target!== handler.target);
+          // server.Handlers = server.Handlers?.filter((itemH) => itemH.id !== handler.id);
         }
         return { ...server };
       });
@@ -56,16 +58,47 @@ export const ServerPage = () => {
 
   const deleteServer = () => {
     appCtx.setDataSource((preState: server[]) => {
-      return preState.filter((server) => server.name !== activeKey);
+      return preState.filter((server) => server.Name !== activeKey);
     });
   };
 
   const putServers = async () => {
     try {
-      let data = await appCtx.fetch('put', '/api/servers', { servers: appCtx.dataSource });
-      if (data) {
-        initialize();
+      // let data = await appCtx.fetch('put', '/api/servers', { servers: appCtx.dataSource,token:'ckpgkd3es000008lac4yge3ii' });
+      let servers = [];
+      for (const server of appCtx.dataSource){
+        servers.push({
+          id:server.id,
+          Name:server.Name,
+          Domain:server.Domain,
+          Port:server.Port,
+          Handlers:server.Handlers
+        })
       }
+      console.log('servers: ',JSON.stringify(servers))
+      let variables =  {
+            servers: servers,
+            // token: 'ckpgoohog000008mk6vvd7sfi',
+          }
+      let data= await appCtx.mutate(putServer,'putServer',variables)
+          if (data) {
+            initialize(); 
+          }
+
+      // let data = await client.mutate({
+      //   mutation: gql(putServer),
+      //   variables: {
+      //     servers: servers,
+      //     token: 'ckpgkd3es000008lac4yge3ii',
+      //   },
+      // });
+      // if (data) {
+      //   console.log('data: ', JSON.stringify(data))
+      //   if () {
+          
+      //   }
+      //   initialize();
+      // }
     } catch (error) {
       Notification.add('error', error.message);
     }
@@ -95,7 +128,7 @@ export const ServerPage = () => {
       render: (item) => (
         <antd.Button
           onClick={() => {
-            appCtx.setModal(<EditHandler handler={item} />);
+            appCtx.setModal(<EditHandler handler={item} serverName={activeKey} />);
           }}
           type="primary"
         >
@@ -145,18 +178,18 @@ export const ServerPage = () => {
         }}
       >
         {appCtx.dataSource.map((item, index) => (
-          <antd.Tabs.TabPane tab={item.name} key={item.name}>
+          <antd.Tabs.TabPane tab={item.Name} key={item.Name}>
             <div>
               <antd.Descriptions bordered>
-                {item.domain && (
-                  <antd.Descriptions.Item label="Domain">{item.domain}</antd.Descriptions.Item>
+                {item.Domain && (
+                  <antd.Descriptions.Item label="Domain">{item.Domain}</antd.Descriptions.Item>
                 )}
 
-                <antd.Descriptions.Item label="Port">{item.port}</antd.Descriptions.Item>
+                <antd.Descriptions.Item label="Port">{item.Port}</antd.Descriptions.Item>
               </antd.Descriptions>
               <div className="mb-3" />
-              {item.handlers && item.handlers.length > 0 && (
-                <antd.Table dataSource={item.handlers} columns={columns} pagination={false} />
+              {item.Handlers && item.Handlers.length > 0 && (
+                <antd.Table dataSource={item.Handlers} columns={columns} pagination={false} />
               )}
               <div className="d-flex mt-3 justify-content-end ">
                 <antd.Button
@@ -169,7 +202,7 @@ export const ServerPage = () => {
                 </antd.Button>
                 <antd.Button
                   onClick={() => {
-                    let cserver = appCtx.dataSource.filter((item) => item.name === activeKey);
+                    let cserver = appCtx.dataSource.filter((item) => item.Name === activeKey);
                     appCtx.setModal(<EditServer server={cserver[0]} />);
                   }}
                   type="primary"

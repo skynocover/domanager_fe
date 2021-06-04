@@ -20,27 +20,27 @@ export const AddHandler = ({ handlerID }: AddHandlerProps) => {
     appCtx.setModal(null);
 
     appCtx.setDataSource((preState: server[]) => {
-      let maxHandlerID = 0;
+      // let maxHandlerID = 0;
+
+      // preState.map((server) => {
+      //   server.Handlers?.map((handler) => {
+      //     if (handler.id > maxHandlerID) {
+      //       maxHandlerID = handler.id;
+      //     }
+      //     return handler;
+      //   });
+      //   return server;
+      // });
 
       preState.map((server) => {
-        server.handlers?.map((handler) => {
-          if (handler.id > maxHandlerID) {
-            maxHandlerID = handler.id;
-          }
-          return handler;
-        });
-        return server;
-      });
-
-      preState.map((server) => {
-        if (server.id === handlerID && server.handlers) {
-          server.handlers.push({
-            id: maxHandlerID + 1,
+        if (server.id === handlerID && server.Handlers) {
+          server.Handlers.push({
+            // id: maxHandlerID + 1,
             type: values.type,
-            routes: values.routes,
+            route: values.route,
             target: values.target,
           });
-          server.handlers = [...server.handlers];
+          server.Handlers = [...server.Handlers];
         }
         return { ...server };
       });
@@ -62,7 +62,7 @@ export const AddHandler = ({ handlerID }: AddHandlerProps) => {
         </antd.Select>
       </antd.Form.Item>
 
-      <antd.Form.Item name="routes">
+      <antd.Form.Item name="route">
         <antd.Input prefix={<i className="fa fa-exchange" />} placeholder="Please input routes" />
       </antd.Form.Item>
 

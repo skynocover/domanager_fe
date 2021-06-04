@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-domanagerfe-dev-160336-authRole",
+      "UnauthRoleArn": "arn:aws:iam::969776445125:role/amplify-domanagerfe-dev-160336-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::969776445125:role/amplify-domanagerfe-dev-160336-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-domanagerfe-dev-160336-deployment",
+      "UnauthRoleName": "amplify-domanagerfe-dev-160336-unauthRole",
+      "StackName": "amplify-domanagerfe-dev-160336",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:969776445125:stack/amplify-domanagerfe-dev-160336/35504230-c442-11eb-9736-069a76248b8b",
+      "AmplifyAppId": "d24lbe8futhmu9"
+    }
+  }
+}

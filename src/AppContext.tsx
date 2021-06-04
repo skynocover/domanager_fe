@@ -8,6 +8,9 @@ import { Notification } from './components/Notification';
 import { ApolloClient, InMemoryCache, NormalizedCacheObject, DefaultOptions } from '@apollo/client';
 import AWSAppSyncClient, { defaultDataIdFromObject } from 'aws-appsync';
 import appSyncConfig from './aws-exports';
+import { useCookies } from 'react-cookie';
+
+
 export const client = new AWSAppSyncClient({
   url: appSyncConfig.aws_appsync_graphqlEndpoint,
   region: appSyncConfig.aws_appsync_region,
@@ -39,6 +42,7 @@ interface AppContextProps {
   login: (account: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
   redirect: () => Promise<void>;
+  mutate: (mutation: string, resKey: string, variables: any) => Promise<any>
 
   apolloClient: ApolloClient<NormalizedCacheObject>;
 }
@@ -56,16 +60,16 @@ export const app = firebase;
 
 export interface server {
   id: number;
-  domain: string;
-  name: string;
-  port: string;
-  handlers: handler[];
+  Domain: string;
+  Name: string;
+  Port: string;
+  Handlers: handler[];
 }
 
 export interface handler {
-  id: number;
+  // id: number;
   type: string;
-  routes: string | null;
+  route: string | null;
   target: string;
 }
 
@@ -78,7 +82,7 @@ const AppProvider = ({ children }: AppProviderProps) => {
   const [isAdmin, setIsAdmin] = React.useState(false);
 
   const [dataSource, setDataSource] = React.useState<server[]>([]); //coulmns data
-
+  const [cookies, setCookie] = useCookies(['token']);
   /////////////////////////////////////////////////////
 
   React.useEffect(() => {
@@ -143,21 +147,22 @@ const AppProvider = ({ children }: AppProviderProps) => {
     // });
     try {
       let data = await client.query({
-        query: gql`
-          ${authUser}
-        `,
+        query: gql(authUser),
         variables: {
           id: account,
           password: password,
         },
+        fetchPolicy: 'network-only'
       });
       // setAccount(account);
 
       // const data = { errorCode: '0' };
 
-      if (data) {
-        console.log('login data: ', data);
-
+      if (data && data.data ) {
+        console.log('login data: ', data.data);
+      
+        let result = JSON.parse(JSON.stringify(data.data));
+        setCookie('token',result.authUser.data)
         // if (data.errorCode === 0) {
         Notification.add('success', '驗證成功');
         window.location.href = homePage;
@@ -182,6 +187,31 @@ const AppProvider = ({ children }: AppProviderProps) => {
     // }
   };
 
+  const mutate = async (mutation:string,resKey:string,variables:any): Promise<any> =>{
+    let data: any = null;
+    try {
+      variables.token = cookies['token']
+      let data = await client.mutate({
+        mutation: gql(mutation),
+        variables      ,
+      });
+      if (data) {
+        let result = JSON.parse(JSON.stringify(data.data))
+        console.log('result: ', JSON.stringify(result))
+        if (result[resKey].errorCode ===1000){
+          window.location.href = loginPage;
+          return null;
+        }
+        if (result[resKey].errorCode!==0) {
+          throw new Error(result[resKey].errorMessage);
+        }
+      }
+    } catch (error) {
+      Notification.add('error', error.message);
+    }
+    return data
+  }
+
   /////////////////////////////////////////////////////
 
   return (
@@ -203,6 +233,7 @@ const AppProvider = ({ children }: AppProviderProps) => {
         login,
         logout,
         redirect,
+        mutate,
 
         apolloClient,
       }}

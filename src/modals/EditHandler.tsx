@@ -9,9 +9,10 @@ import { Notification } from '../components/Notification';
 
 interface EditHandlerProps {
   handler: handler;
+  serverName: string
 }
 
-export const EditHandler = ({ handler }: EditHandlerProps) => {
+export const EditHandler = ({ handler ,serverName}: EditHandlerProps) => {
   const appCtx = React.useContext(AppContext);
 
   React.useEffect(() => {}, []);
@@ -21,13 +22,12 @@ export const EditHandler = ({ handler }: EditHandlerProps) => {
 
     appCtx.setDataSource((preState: server[]) => {
       preState.map((server) => {
-        if (server.handlers) {
-          server.handlers = server.handlers?.map((item) => {
-            if (item.id === handler.id) {
+        if (server.Handlers && server.Name === serverName) {
+          server.Handlers = server.Handlers?.map((item) => {
+            if (item.type === handler.type&& item.route===handler.route && item.target===handler.target) {
               return {
-                id: item.id,
                 type: values.type,
-                routes: values.routes,
+                route: values.route,
                 target: values.target,
               };
             }
@@ -47,7 +47,7 @@ export const EditHandler = ({ handler }: EditHandlerProps) => {
   return (
     <antd.Form
       onFinish={onFinish}
-      initialValues={{ type: handler.type, routes: handler.routes, target: handler.target }}
+      initialValues={{ type: handler.type, routes: handler.route, target: handler.target }}
     >
       <h5 className="font-weight-bold mb-4">Edit Handler</h5>
 
@@ -58,7 +58,7 @@ export const EditHandler = ({ handler }: EditHandlerProps) => {
         </antd.Select>
       </antd.Form.Item>
 
-      <antd.Form.Item name="routes">
+      <antd.Form.Item name="route">
         <antd.Input prefix={<i className="fa fa-exchange" />} placeholder="Please input routes" />
       </antd.Form.Item>
 
